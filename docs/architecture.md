@@ -4,7 +4,6 @@ Authentication flow
 Folder structure
 Design decisions
 
-
 -Frontend
 
 React

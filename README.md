@@ -11,23 +11,27 @@ Although built initially for a single church family house, the system is designe
 ## ✨ Features
 
 ### Authentication
+
 - Secure JWT authentication
 - Role-based access control
 - Protected routes
 - Password hashing with bcrypt
 
 ### Member Management
+
 - Register members
 - Manage member profiles
 - Track active/inactive members
 
 ### Payment Management
+
 - Record monthly subscriptions
 - Automatic receipt generation
 - Payment history
 - Outstanding payment tracking
 
 ### Roster Management
+
 - Automatic cooking roster generation
 - Worship leader scheduling
 - Prayer leader scheduling
@@ -36,11 +40,13 @@ Although built initially for a single church family house, the system is designe
 - Manual schedule adjustment
 
 ### Announcements
+
 - Create announcements
 - Notify members
 - Future WhatsApp integration
 
 ### Reports
+
 - Monthly financial reports
 - Member participation reports
 - Attendance reports (planned)
@@ -56,8 +62,8 @@ Although built initially for a single church family house, the system is designe
 - Vite
 - React Router
 - Axios
-- Tailwind CSS *(planned)*
-- Shadcn UI *(planned)*
+- Tailwind CSS _(planned)_
+- Shadcn UI _(planned)_
 
 ## Backend
 
@@ -81,7 +87,7 @@ Although built initially for a single church family house, the system is designe
 - ESLint
 - Prettier
 - Git
-- Docker *(planned)*
+- Docker _(planned)_
 
 ---
 
@@ -192,14 +198,14 @@ VITE_API_URL=http://localhost:5000
 
 # 📜 Available Commands
 
-| Command | Description |
-|----------|-------------|
-| `pnpm install` | Install all workspace dependencies |
-| `pnpm dev` | Run frontend and backend together |
-| `pnpm --filter client dev` | Run React app |
-| `pnpm --filter server dev` | Run Express server |
-| `pnpm prisma migrate dev` | Run database migrations *(after Prisma setup)* |
-| `pnpm prisma studio` | Open Prisma Studio |
+| Command                    | Description                                    |
+| -------------------------- | ---------------------------------------------- |
+| `pnpm install`             | Install all workspace dependencies             |
+| `pnpm dev`                 | Run frontend and backend together              |
+| `pnpm --filter client dev` | Run React app                                  |
+| `pnpm --filter server dev` | Run Express server                             |
+| `pnpm prisma migrate dev`  | Run database migrations _(after Prisma setup)_ |
+| `pnpm prisma studio`       | Open Prisma Studio                             |
 
 ---
 

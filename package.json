@@ -9,6 +9,7 @@
   ],
   "packageManager": "pnpm@10.28.1",
   "scripts": {
+    "check": "pnpm -r exec tsc --noEmit && pnpm -r lint",
     "dev": "concurrently \"pnpm --filter client dev\" \"pnpm --filter server dev\"",
     "client": "pnpm --filter client dev",
     "server": "pnpm --filter server dev"
@@ -20,7 +21,7 @@
   "keywords": [],
   "author": "Osfoce",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/Osfoce/Family-house-manager/issues"
   },
