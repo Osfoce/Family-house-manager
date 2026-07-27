@@ -1,0 +1,33 @@
+{
+  "name": "family-house-manager",
+  "version": "1.0.0",
+  "description": "Family house manager",
+  "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "packageManager": "pnpm@10.28.1",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter client dev\" \"pnpm --filter server dev\"",
+    "client": "pnpm --filter client dev",
+    "server": "pnpm --filter server dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Osfoce/Family-house-manager.git"
+  },
+  "keywords": [],
+  "author": "Osfoce",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Osfoce/Family-house-manager/issues"
+  },
+  "homepage": "https://github.com/Osfoce/Family-house-manager#readme",
+  "devDependencies": {
+    "concurrently": "^9.0.0",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6"
+  }
+}

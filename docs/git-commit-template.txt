@@ -1,0 +1,7 @@
+git commit -m "chore: initialize pnpm monorepo"
+git commit -m "feat(auth): implement JWT authentication"
+git commit -m "feat(users): add user management module"
+git commit -m "feat(payments): generate payment receipts"
+git commit -m "fix(auth): handle expired refresh tokens"
+git commit -m "refactor(roster): simplify scheduling algorithm"
+git commit -m "docs: add API setup instructions"
