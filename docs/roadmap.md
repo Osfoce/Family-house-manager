@@ -13,7 +13,7 @@ This roadmap outlines the exact weekly deliverables for the Church Family House 
 - [ ] **Prisma Schema (MVP):** Define the initial `User`, `Role`, `Member`, and `Payment` models.
 - [ ] **Authentication:** Implement secure JWT-based authentication (Login/Signup) with password hashing.
 - [ ] **Role-Based Access Control:** Seed the database with three roles (`SUPER_ADMIN`, `TREASURER`, `MEMBER`) and enforce view restrictions on the frontend routes.
-**Note**: Admin handles user registration and the system generates user login details
+- **Note**: Admin handles user registration and the system generates user login details
 
 ### Week 2: Member & Payment CRUD
 - [ ] **Member Dashboard UI:** Build the main layout using Shadcn UI (Sidebar, Header, Main content area).
