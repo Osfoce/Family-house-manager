@@ -14,7 +14,9 @@
 
 **Backend:** Express + TypeScript
 
-**Database:** PostgreSQL + Prisma ORM
+**Database:** Supabase PostgreSQL
+
+**ORM:** Prisma ORM
 
 **Package Manager:** pnpm
 
@@ -24,7 +26,8 @@
 
 * Node.js **24.x LTS** (Recommended)
 * pnpm **10.x**
-* PostgreSQL
+* Supabase Account
+* PostgreSQL Database (Hosted by Supabase)
 * Git
 
 ---
@@ -71,6 +74,24 @@ pnpm install
 
 ---
 
+# Environment Variables
+
+Create:
+
+```text
+apps/server/.env
+```
+
+Required variables
+
+```env
+DATABASE_URL="Session Pooler Connection String"
+```
+
+> The project currently uses the Supabase **Session Pooler** connection because the development environment does not have public IPv6 connectivity. The Direct Connection endpoint resolved to an IPv6 address and resulted in `P1001: Can't reach database server`.
+
+---
+
 ## Start Development
 
 Frontend only
@@ -103,6 +124,59 @@ packages:
 ```
 
 > **Note:** Add additional workspace packages only when they become actual packages (e.g. `packages/shared`).
+
+---
+
+# Prisma Workflow
+
+Validate schema
+
+```bash
+pnpm --filter server exec prisma validate
+```
+
+Create migration
+
+```bash
+pnpm --filter server exec prisma migrate dev --name migration_name
+```
+
+Generate Prisma Client
+
+```bash
+pnpm --filter server exec prisma generate
+```
+
+Format Prisma schema
+
+```bash
+pnpm --filter server exec prisma format
+```
+
+---
+
+# Database
+
+Provider
+
+- Supabase PostgreSQL
+
+ORM
+
+- Prisma
+
+Current Tables
+
+- User
+- MedicalInformation
+- EmergencyContact
+- _prisma_migrations
+
+Migration Location
+
+```text
+apps/server/prisma/migrations/
+```
 
 ---
 
@@ -434,6 +508,46 @@ Do not delete them unless intentionally opting out of those integrations.
 
 ---
 
+## 12. Supabase Direct Connection (P1001)
+
+### Problem
+
+```text
+P1001: Can't reach database server
+```
+
+### Cause
+
+The Direct Connection endpoint resolved to an IPv6 address.
+
+The development machine had only a link-local IPv6 address (`fe80::`) and therefore could not reach the public IPv6 internet.
+
+### Symptoms
+
+```text
+ping db.<project>.supabase.co
+
+Network is unreachable
+```
+
+```text
+nc -vz db.<project>.supabase.co 5432
+
+Network is unreachable
+```
+
+### Solution
+
+Use the Supabase **Session Pooler** connection string instead of the Direct Connection string.
+
+```env
+DATABASE_URL="postgresql://..."
+```
+
+The migration completed successfully afterwards.
+
+---
+
 # Useful Commands
 
 Install dependencies
@@ -492,6 +606,8 @@ pnpm -r list
 
 ---
 
+
+
 # Current Project Status
 
 * ✅ pnpm Workspace
@@ -501,17 +617,74 @@ pnpm -r list
 * ✅ Root Scripts
 * ✅ Concurrent Development
 * ✅ Prisma Installed
+* ✅ Configure Supabase PostgreSQL
+* ✅ Configure Prisma
+* ✅ Connect Prisma to Supabase
+* ✅ Create User schema
+* ✅ Create MedicalInformation schema
+* ✅ Create EmergencyContact schema
+* ✅ Create enums
+* ✅ Run first migration
+* ✅ Generate Prisma Client
 
 ### Next Tasks
 
-* Configure PostgreSQL
-* Create Prisma User model
-* Run first migration
-* Configure ESLint
-* Configure Prettier
-* Add Husky + lint-staged
-* Build Authentication
-* Implement Role-Based Access Control
+* Configure shared ESLint
+* Configure shared Prettier
+* Create backend architecture
+* Configure Prisma Client singleton
+* Build Authentication module
+* Seed first administrator
+* JWT Authentication
+* Role-Based Access Control
+* Member Registration
+
+---
+
+# Backend Progress
+
+✅ Express Server
+
+✅ Prisma ORM
+
+✅ Supabase PostgreSQL
+
+✅ Database Schema
+
+⬜ Authentication
+
+⬜ Authorization
+
+⬜ Member Module
+
+⬜ Payment Module
+
+⬜ Roster Module
+
+⬜ WhatsApp Notification Module
+
+⬜ Dashboard
+
+⬜ Reports
+
+⬜ Audit Logs
+
+---
+
+# Architectural Decisions
+
+- Monorepo managed with pnpm workspaces.
+- React and Express are maintained as separate applications.
+- PostgreSQL is hosted on Supabase.
+- Prisma is the sole ORM for database access.
+- Medical information is stored in a separate table.
+- Emergency contacts are stored in a separate table.
+- Images are stored externally; only their URLs are persisted.
+- User roles are represented with Prisma enums.
+- Authentication is administrator-driven; users cannot self-register.
+- Passwords are stored as hashes only.
+- Members are required to change their generated password on first login.
+- The Session Pooler is used for development because the current environment lacks public IPv6 connectivity for the direct database endpoint.
 
 ---
 

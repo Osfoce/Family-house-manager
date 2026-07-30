@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -10,4 +5,100 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum Role {
+  MEMBER
+  PRESIDENT
+  SECRETARY_GENERAL
+  HOUSE_MAMA
+  HOUSE_COORDINATOR
+}
+
+enum MemberType {
+  CORPS_MEMBER
+  CHURCH_COORDINATOR
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+}
+
+enum EmergencyRelationship {
+  FATHER
+  MOTHER
+  BROTHER
+  SISTER
+  SPOUSE
+  GUARDIAN
+  FRIEND
+  OTHER
+}
+
+model User {
+  id String @id @default(cuid())
+
+  // Identity
+  firstName       String
+  lastName        String
+  profileImageUrl String?
+
+  gender        Gender
+  maritalStatus MaritalStatus
+  memberType    MemberType
+
+  // Authorization
+  role Role @default(MEMBER)
+
+  // Contact
+  phoneNumber String @unique
+  email       String @unique
+
+  // Authentication
+  passwordHash       String
+  mustChangePassword Boolean @default(true)
+
+  // Membership
+  arrivalDate   DateTime  @default(now())
+  departureDate DateTime?
+  isActive      Boolean   @default(true)
+
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  createdById  String?
+  createdBy    User?   @relation("UserCreator", fields: [createdById], references: [id])
+  createdUsers User[]  @relation("UserCreator")
+
+  // Relations
+  medicalInformation MedicalInformation?
+  emergencyContact   EmergencyContact?
+}
+
+model MedicalInformation {
+  id String @id @default(cuid())
+
+  medicalNotes     String?
+  medicalReportUrl String?
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmergencyContact {
+  id String @id @default(cuid())
+
+  fullName     String
+  phoneNumber  String
+  relationship EmergencyRelationship
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
