@@ -53,215 +53,84 @@ Although built initially for a single church family house, the system is designe
 
 ---
 
-# 🛠 Tech Stack
+## Architecture
 
-## Frontend
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | React + Vite + TypeScript |
+| **Backend** | Express + TypeScript |
+| **Package Manager** | pnpm (monorepo workspace) |
+| **Database** | Supabase PostgreSQL |
+| **ORM** | Prisma |
+| **UI Library** | Shadcn UI |
+| **PDF Generation** | pdfkit / puppeteer / react-pdf |
+| **WhatsApp** | WhatsApp Business Cloud API |
+| **Scheduling** | node-cron |
 
-- React
-- TypeScript
-- Vite
-- React Router
-- Axios
-- Tailwind CSS _(planned)_
-- Shadcn UI _(planned)_
 
-## Backend
+---
 
-- Node.js
-- Express
-- TypeScript
+## System Requirements
 
-## Database
-
-- PostgreSQL
-- Prisma ORM
-
-## Authentication
-
-- JWT
-- bcrypt
-
-## Tooling
-
-- pnpm Workspaces
-- ESLint
-- Prettier
+- Node.js **24.x LTS** (Recommended)
+- pnpm **10.x**
+- Supabase Account
+- PostgreSQL Database (Hosted by Supabase)
 - Git
-- Docker _(planned)_
 
 ---
 
 # 📁 Project Structure
 
-```
+```text
 family-house-manager/
 │
 ├── apps/
-│   ├── client/
-│   └── server/
+│   ├── client/          # React + Vite frontend
+│   └── server/          # Express + TypeScript backend
 │
-├── docs/
-│
-├── shared/
+├── docs/                # Documentation
+├── packages/            # Shared workspace packages (reserved)
 │
 ├── .gitignore
+├── .prettierignore
+├── README.md
 ├── pnpm-workspace.yaml
 ├── package.json
-└── README.md
+└── pnpm-lock.yaml
 ```
 
 ---
 
-# 🚀 Getting Started
-
-## Prerequisites
-
-- Node.js 22.12.0
-- pnpm
-- PostgreSQL
-
----
-
-## Installation
-
-Clone the repository
+## Quick Start
 
 ```bash
+# Clone repository
 git clone https://github.com/Osfoce/Family-house-manager.git
-```
-
-Navigate into the project
-
-```bash
 cd Family-house-manager
-```
 
-Install dependencies
-
-```bash
+# Install dependencies
 pnpm install
-```
 
-Start the frontend
+# Configure environment (see INSTALL.md)
+cp apps/server/.env.example apps/server/.env
+# Edit apps/server/.env and add your DATABASE_URL
 
-```bash
-pnpm --filter client dev
-```
-
-Start the backend
-
-```bash
-pnpm --filter server dev
+# Run both frontend and backend
+pnpm dev
 ```
 
 ---
 
-# 🔐 Environment Variables
+## Documentation
 
-## Server
+| File | Purpose |
+|------|---------|
+| [`INSTALL.md`](INSTALL.md) | Detailed setup, environment configuration, and development commands |
+| [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) | Common issues encountered during setup and development |
+| [`STATUS.md`](STATUS.md) | Current project progress and module completion tracker |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Architectural decisions, patterns, and lessons learned |
 
-Create:
-
-```
-apps/server/.env
-```
-
-Example
-
-```env
-PORT=5000
-
-DATABASE_URL=
-
-JWT_SECRET=
-
-JWT_REFRESH_SECRET=
-```
-
----
-
-## Client
-
-Create:
-
-```
-apps/client/.env
-```
-
-Example
-
-```env
-VITE_API_URL=http://localhost:5000
-```
-
----
-
-# 📜 Available Commands
-
-| Command                    | Description                                    |
-| -------------------------- | ---------------------------------------------- |
-| `pnpm install`             | Install all workspace dependencies             |
-| `pnpm dev`                 | Run frontend and backend together              |
-| `pnpm --filter client dev` | Run React app                                  |
-| `pnpm --filter server dev` | Run Express server                             |
-| `pnpm prisma migrate dev`  | Run database migrations _(after Prisma setup)_ |
-| `pnpm prisma studio`       | Open Prisma Studio                             |
-
----
-
-# 🗺 Roadmap
-
-## Phase 1
-
-- [x] Project setup
-- [ ] Authentication
-- [ ] User roles
-- [ ] Dashboard
-
----
-
-## Phase 2
-
-- [ ] Member management
-- [ ] Payment management
-- [ ] Receipt generation
-
----
-
-## Phase 3
-
-- [ ] Automatic roster generation
-- [ ] PDF roster export
-- [ ] Manual roster editing
-
----
-
-## Phase 4
-
-- [ ] WhatsApp notifications
-- [ ] Announcements
-- [ ] Reminder system
-
----
-
-## Phase 5
-
-- [ ] Attendance tracking
-- [ ] Expense management
-- [ ] Inventory management
-- [ ] Visitor management
-
----
-
-## Future
-
-- Multi-house support
-- Mobile application
-- QR attendance
-- Analytics dashboard
-- Cloud deployment
-- Email notifications
-- Calendar integration
 
 ---
 
