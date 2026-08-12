@@ -12,7 +12,8 @@
     "check": "pnpm -r exec tsc --noEmit && pnpm -r lint",
     "dev": "concurrently \"pnpm --filter client dev\" \"pnpm --filter server dev\"",
     "client": "pnpm --filter client dev",
-    "server": "pnpm --filter server dev"
+    "server": "pnpm --filter server dev",
+    "verify": "pnpm -r exec tsc --noEmit && pnpm --filter server exec prisma validate && pnpm --filter server exec prisma generate && pnpm --filter server build && pnpm --filter client build"
   },
   "repository": {
     "type": "git",

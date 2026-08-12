@@ -295,12 +295,14 @@ These provide AI assistant integration for Prisma. They are expected. Do not del
 ### Problem
 
 ```text
-P1001: Can't reach database server
+P1001: Can't reach database server even though the project had already been resumed.
 ```
 
 ### Cause
 
 The Direct Connection endpoint resolved to an IPv6 address. The development machine had only a link-local IPv6 address (`fe80::`) and therefore could not reach the public IPv6 internet.
+Also
+On the free tier, the database and/or session pooler may take a short time to become fully available after resuming. The first connection attempts can fail even though the service is in the process of starting.
 
 ### Symptoms
 
@@ -310,6 +312,10 @@ ping db.<project>.supabase.co
 
 nc -vz db.<project>.supabase.co 5432
 # Network is unreachable
+
+nc -vz aws-0-eu-west-1.pooler.supabase.com 5432
+# If the connection succeeds, the infrastructure is reachable.
+
 ```
 
 ### Solution
@@ -319,5 +325,46 @@ Use the Supabase **Session Pooler** connection string instead of the Direct Conn
 ```env
 DATABASE_URL="postgresql://..."
 ```
+Wait a few minutes after resuming the project, then retry:
+
+```bash 
+pnpm --filter server exec prisma migrate status 
+```
 
 The migration completed successfully afterwards.
+
+## 13 Prisma could not read DATABASE_URL from the .env file.
+### Cause
+
+Prisma 7 no longer loads .env automatically through the CLI configuration.
+
+### Solution
+
+Import dotenv in prisma.config.ts.
+
+```import "dotenv/config";```
+
+Then expose the datasource:
+
+```datasource: {
+  url: process.env.DATABASE_URL,
+}```
+
+
+## 14 Prisma 7 Requires a Database Adapter
+Problem
+
+Property 'adapter' is missing in type ...
+
+Cause
+
+Prisma 7 no longer creates database connections directly for PostgreSQL when using the new prisma-client generator.
+
+Solution
+
+Install the PostgreSQL adapter.
+
+```bash
+pnpm add @prisma/adapter-pg```
+
+Configure it during Prisma Client initialization.

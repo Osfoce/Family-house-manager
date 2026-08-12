@@ -49,7 +49,7 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
 
-    "rootDir": "./src",
+    "rootDir": ".",
     "outDir": "./dist",
 
     "strict": true,
@@ -59,7 +59,7 @@
 
     "sourceMap": true,
 
-     "types": ["node"]
+    "types": ["node"]
   },
-  "include": ["src", "prisma.config.ts"]
+  "include": ["src", "generated", "prisma.config.ts"]
 }
