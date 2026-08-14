@@ -7,17 +7,13 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Role {
-  MEMBER
-  PRESIDENT
-  SECRETARY_GENERAL
-  HOUSE_MAMA
-  HOUSE_COORDINATOR
-}
+// ============================================================
+// ENUMS
+// ============================================================
 
 enum MemberType {
   CORPS_MEMBER
-  CHURCH_COORDINATOR
+  CHURCH_MEMBER
 }
 
 enum Gender {
@@ -41,56 +37,323 @@ enum EmergencyRelationship {
   OTHER
 }
 
+// ============================================================
+// ADMINISTRATION
+// ============================================================
+
+// Describes the level of administrative authority.
+//
+// These are deliberately separate from house positions.
+// For example, PRESIDENT is a position, while HOUSE_ADMIN
+// describes the authority level.
+enum AdminRole {
+  MEMBER
+  HOUSE_ADMIN
+  COORDINATOR
+}
+
+// Standard administrative positions.
+//
+// A house can use a custom `title` in HouseAdminAssignment
+// if they use a different name for the position.
+enum HouseAdminPosition {
+  PRESIDENT
+  SECRETARY_GENERAL
+  HOUSE_MAMA
+}
+
+// Individual system permissions.
+//
+// These are application-level capabilities. The actual mapping
+// between AdminRole and Permission can initially live in the
+// application/business logic rather than the database.
+enum Permission {
+  VIEW_MEMBERS
+  REGISTER_MEMBER
+  EDIT_MEMBER
+  DELETE_MEMBER
+
+  MANAGE_PRAYERS
+  MANAGE_HOUSE
+
+  MANAGE_ADMINS
+
+  VIEW_MEDICAL_INFORMATION
+  EDIT_MEDICAL_INFORMATION
+
+  VIEW_PAYMENTS
+  RECORD_PAYMENT
+  MANAGE_PAYMENTS
+  VIEW_PAYMENT_HISTORY
+
+  MANAGE_ROSTER
+  VIEW_ROSTER
+}
+
+// ============================================================
+// PAYMENTS
+// ============================================================
+
+enum PaymentStatus {
+  PENDING
+  SUCCESSFUL
+  FAILED
+  REFUNDED
+}
+
+// Types of payments the house may collect.
+//
+// This can be expanded later without changing the Payment
+// architecture.
+enum PaymentType {
+  DUES
+  WELFARE
+  CONTRIBUTION
+  EVENT
+  OTHER
+}
+
+// ============================================================
+// ROSTER
+// ============================================================
+
+enum RosterStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+// ============================================================
+// HOUSE
+// ============================================================
+
+model House {
+  id   String @id @default(cuid())
+  name String @unique
+
+  createdAt DateTime @default(now())
+
+  // Person who originally created the house.
+  // This is an audit record and does NOT necessarily represent
+  // the current administrator.
+  createdById String
+  createdBy   User   @relation("HouseCreator", fields: [createdById], references: [id])
+
+  // Ordinary members belonging to this house.
+  members User[]
+
+  // Current and historical administrative assignments.
+  adminAssignments HouseAdminAssignment[]
+
+  // Coordinators assigned to this house.
+  coordinators HouseCoordinator[]
+
+  // Payments belonging to this house.
+  payments Payment[]
+
+  // Roster entries belonging to this house.
+  rosterEntries RosterEntry[]
+}
+
+// ============================================================
+// USER
+// ============================================================
+
 model User {
   id String @id @default(cuid())
 
+  // ----------------------------------------------------------
   // Identity
-  firstName       String
-  lastName        String
-  profileImageUrl String?
+  // ----------------------------------------------------------
+
+  firstName String
+  lastName  String
+
+  // URL to externally stored profile image.
+  profileImageUrl String
 
   gender        Gender
   maritalStatus MaritalStatus
   memberType    MemberType
 
-  // Authorization
-  role Role @default(MEMBER)
+  // ----------------------------------------------------------
+  // HOUSE MEMBERSHIP
+  // ----------------------------------------------------------
 
-  // Contact
+  // Ordinary members belong to exactly one house.
+  //
+  // Nullable because a coordinator may coordinate multiple
+  // houses without being a resident/member of those houses.
+  houseId String?
+  house   House?  @relation(fields: [houseId], references: [id])
+
+  // ----------------------------------------------------------
+  // CONTACT
+  // ----------------------------------------------------------
+
   phoneNumber String @unique
   email       String @unique
 
-  // Authentication
+  // ----------------------------------------------------------
+  // AUTHENTICATION
+  // ----------------------------------------------------------
+
   passwordHash       String
   mustChangePassword Boolean @default(true)
 
-  // Membership
+  // ----------------------------------------------------------
+  // MEMBERSHIP
+  // ----------------------------------------------------------
+
   arrivalDate   DateTime  @default(now())
   departureDate DateTime?
   isActive      Boolean   @default(true)
 
-  // Audit
+  // ----------------------------------------------------------
+  // AUDIT
+  // ----------------------------------------------------------
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  createdById  String?
-  createdBy    User?   @relation("UserCreator", fields: [createdById], references: [id])
-  createdUsers User[]  @relation("UserCreator")
+  // Administrator who registered this user.
+  createdById String
+  createdBy   User   @relation("UserCreator", fields: [createdById], references: [id])
 
-  // Relations
+  createdUsers User[] @relation("UserCreator")
+
+  // Houses originally created by this user.
+  createdHouses House[] @relation("HouseCreator")
+
+  // ----------------------------------------------------------
+  // ADMINISTRATION
+  // ----------------------------------------------------------
+
+  // Current and historical positions held by the user.
+  adminAssignments HouseAdminAssignment[]
+
+  // Houses coordinated by the user.
+  coordinatedHouses HouseCoordinator[]
+
+  // ----------------------------------------------------------
+  // MEDICAL / EMERGENCY
+  // ----------------------------------------------------------
+
   medicalInformation MedicalInformation?
   emergencyContact   EmergencyContact?
+
+  // ----------------------------------------------------------
+  // PAYMENTS
+  // ----------------------------------------------------------
+
+  payments Payment[]
+
+  // ----------------------------------------------------------
+  // ROSTER
+  // ----------------------------------------------------------
+
+  rosterEntries RosterEntry[]
 }
+
+// ============================================================
+// HOUSE ADMINISTRATIVE ASSIGNMENT
+// ============================================================
+//
+// Tracks who holds which administrative position in a house.
+//
+// This also preserves historical leadership.
+//
+// Example:
+//
+// John → House A → PRESIDENT → Jan 2026 → Jan 2027
+// Mary → House A → PRESIDENT → Jan 2027 → present
+//
+// John's record remains after he leaves office.
+//
+
+model HouseAdminAssignment {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  houseId String
+  house   House  @relation(fields: [houseId], references: [id], onDelete: Cascade)
+
+  // Level of authority.
+  role AdminRole
+
+  // Administrative position.
+  position HouseAdminPosition
+
+  // Allows the house to display a different title.
+  //
+  // Example:
+  // position = PRESIDENT
+  // title = "Head of House"
+  title String?
+
+  // Leadership history.
+  startDate DateTime  @default(now())
+  endDate   DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([houseId])
+  @@index([houseId, position])
+}
+
+// ============================================================
+// HOUSE COORDINATOR
+// ============================================================
+//
+// A coordinator can coordinate multiple houses.
+//
+// Therefore:
+//
+// User → many Houses
+// House → many Coordinators
+//
+
+model HouseCoordinator {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  houseId String
+  house   House  @relation(fields: [houseId], references: [id], onDelete: Cascade)
+
+  startDate DateTime  @default(now())
+  endDate   DateTime?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, houseId])
+  @@index([houseId])
+  @@index([userId])
+}
+
+// ============================================================
+// MEDICAL INFORMATION
+// ============================================================
 
 model MedicalInformation {
   id String @id @default(cuid())
 
   medicalNotes     String?
-  medicalReportUrl String?
+  medicalReportUrl String
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+// ============================================================
+// EMERGENCY CONTACT
+// ============================================================
 
 model EmergencyContact {
   id String @id @default(cuid())
@@ -102,3 +365,136 @@ model EmergencyContact {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+// ============================================================
+// PAYMENT
+// ============================================================
+//
+// One user can make many payments.
+//
+// Payment history therefore comes naturally from this table.
+//
+// Example:
+//
+// John
+// ├── August dues       ₦10,000
+// ├── September dues    ₦10,000
+// └── Welfare           ₦5,000
+//
+
+model Payment {
+  id String @id @default(cuid())
+
+  // ----------------------------------------------------------
+  // Ownership
+  // ----------------------------------------------------------
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  houseId String
+  house   House  @relation(fields: [houseId], references: [id])
+
+  // ----------------------------------------------------------
+  // Payment information
+  // ----------------------------------------------------------
+
+  amount   Decimal
+  currency String  @default("NGN")
+
+  type PaymentType
+
+  description String?
+
+  status PaymentStatus @default(PENDING)
+
+  // Unique payment reference generated by the system.
+  reference String @unique
+
+  // Optional reference supplied by an external payment provider.
+  providerReference String?
+
+  paidAt DateTime?
+
+  // ----------------------------------------------------------
+  // Audit
+  // ----------------------------------------------------------
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([houseId])
+  @@index([status])
+  @@index([paidAt])
+  @@index([userId, createdAt])
+}
+
+// ============================================================
+// ROSTER
+// ============================================================
+//
+// A roster entry represents a person assigned to an activity.
+//
+// The actual generation of rosters will happen in business
+// logic. This table stores the resulting assignments.
+//
+
+model RosterEntry {
+  id String @id @default(cuid())
+
+  // ----------------------------------------------------------
+  // House
+  // ----------------------------------------------------------
+
+  houseId String
+  house   House  @relation(fields: [houseId], references: [id], onDelete: Cascade)
+
+  // ----------------------------------------------------------
+  // Assigned member
+  // ----------------------------------------------------------
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // ----------------------------------------------------------
+  // Activity
+  // ----------------------------------------------------------
+
+  activity String
+
+  // Date/time the assignment is scheduled.
+  scheduledFor DateTime
+
+  status RosterStatus @default(SCHEDULED)
+
+  // Optional notes.
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([houseId, scheduledFor])
+  @@index([userId, scheduledFor])
+  @@index([status])
+}
+
+// ============================================================
+// PAYMENT RECEIPTS
+// ============================================================
+//
+// No separate Receipt table is required initially.
+//
+// A receipt can be generated from a successful Payment using:
+//
+// - Payment.reference
+// - User information
+// - House information
+// - Payment amount
+// - Payment date
+// - Payment type
+//
+// The receipt can be generated dynamically as a PDF.
+//
+// If we later need to permanently store generated receipts,
+// we can add a Receipt model without changing Payment itself.
